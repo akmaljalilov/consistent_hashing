@@ -1,11 +1,9 @@
 package ring
 
 import (
-	"crypto/md5"
-	"encoding/binary"
 	"fmt"
+	"github.com/akmaljalilov/consistent_hashing/utils"
 	"sort"
-	"strconv"
 )
 
 func RingWithVN() {
@@ -34,9 +32,8 @@ func RingWithVN() {
 	}
 	movedIds := 0
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		hsh := md5.Sum([]byte(strconv.Itoa(id)))
-		bi := binary.BigEndian.Uint32(hsh[0:])
-		vNodeId := sort.Search(len(vNodeRangeStarts), func(i int) bool { return vNodeRangeStarts[i] >= int(bi%DATA_ID_COUNT) }) % VNODE_COUNT
+		hsh := utils.GetMD5Hash(id)
+		vNodeId := sort.Search(len(vNodeRangeStarts), func(i int) bool { return vNodeRangeStarts[i] >= int(hsh%DATA_ID_COUNT) }) % VNODE_COUNT
 		nodeId := vNode2Node[vNodeId]
 		nNodeId := newVNode2Node[vNodeId]
 		if nodeId != nNodeId {
@@ -44,7 +41,7 @@ func RingWithVN() {
 		}
 	}
 	movedPercent := float32(100*movedIds) / float32(DATA_ID_COUNT)
-	fmt.Printf("%d ids moved, %v%%\n", movedIds, movedPercent)
+	fmt.Printf("%d ids moved, %.2f%%\n", movedIds, movedPercent)
 }
 
 func RingWithVNOptimized() {
@@ -72,9 +69,8 @@ func RingWithVNOptimized() {
 	}
 	movedIds := 0
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		hsh := md5.Sum([]byte(strconv.Itoa(id)))
-		bi := binary.BigEndian.Uint32(hsh[0:])
-		vNodeId := bi % VNODE_COUNT
+		hsh := utils.GetMD5Hash(id)
+		vNodeId := hsh % VNODE_COUNT
 		nodeId := vNode2Node[vNodeId]
 		nNodeId := newVNode2Node[vNodeId]
 		if nodeId != nNodeId {
@@ -82,5 +78,5 @@ func RingWithVNOptimized() {
 		}
 	}
 	movedPercent := float32(100*movedIds) / float32(DATA_ID_COUNT)
-	fmt.Printf("%d ids moved, %v%%\n", movedIds, movedPercent)
+	fmt.Printf("%d ids moved, %.2f%%\n", movedIds, movedPercent)
 }

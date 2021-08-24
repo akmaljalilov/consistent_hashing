@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/akmaljalilov/consistent_hashing/Simple"
 	exam_simple_modulus "github.com/akmaljalilov/consistent_hashing/exam-simple-modulus"
+	"github.com/akmaljalilov/consistent_hashing/ring"
 )
 
 const (
@@ -18,13 +19,13 @@ func main() {
 	fmt.Println("-------------------------------------------------------------------------------------")
 	exam_simple_modulus.DefineMovedPercent()
 	fmt.Println("-------------------------------------------------------------------------------------")
-	/*ring.SimpleRing()
+	ring.SimpleRing()
 	fmt.Println("-------------------------------------------------------------------------------------")
 	ring.RingWithVN()
 	fmt.Println("-------------------------------------------------------------------------------------")
 	ring.RingWithVNOptimized()
 	fmt.Println("-------------------------------------------------------------------------------------")
-	limitation.LimitateVN()
+	/*limitation.LimitateVN()
 	fmt.Println("-------------------------------------------------------------------------------------")
 	durability.Durability()
 	fmt.Println("-------------------------------------------------------------------------------------")

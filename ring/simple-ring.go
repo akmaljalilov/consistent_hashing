@@ -1,11 +1,9 @@
 package ring
 
 import (
-	"crypto/md5"
-	"encoding/binary"
 	"fmt"
+	"github.com/akmaljalilov/consistent_hashing/utils"
 	"sort"
-	"strconv"
 )
 
 const (
@@ -27,14 +25,13 @@ func SimpleRing() {
 	}
 	movedIds := 0
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		hsh := md5.Sum([]byte(strconv.Itoa(id)))
-		bi := binary.BigEndian.Uint32(hsh[0:])
-		nodeId := sort.Search(len(nodeRangeStarts), func(i int) bool { return nodeRangeStarts[i] >= int(bi%DATA_ID_COUNT) }) % NODE_COUNT
-		newNodeId := sort.Search(len(newNodeRangeStarts), func(i int) bool { return newNodeRangeStarts[i] >= int(bi%DATA_ID_COUNT) }) % NEW_NODE_COUNT
+		hsh := utils.GetMD5Hash(id)
+		nodeId := sort.Search(len(nodeRangeStarts), func(i int) bool { return nodeRangeStarts[i] >= int(hsh%DATA_ID_COUNT) }) % NODE_COUNT
+		newNodeId := sort.Search(len(newNodeRangeStarts), func(i int) bool { return newNodeRangeStarts[i] >= int(hsh%DATA_ID_COUNT) }) % NEW_NODE_COUNT
 		if nodeId != newNodeId {
 			movedIds++
 		}
 	}
 	movedPercent := float32(100*movedIds) / float32(DATA_ID_COUNT)
-	fmt.Printf("%d ids moved, %v%%\n", movedIds, movedPercent)
+	fmt.Printf("%d ids moved, %.2f%%\n", movedIds, movedPercent)
 }
