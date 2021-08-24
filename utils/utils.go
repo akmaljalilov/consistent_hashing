@@ -3,7 +3,6 @@ package utils
 import (
 	"crypto/md5"
 	"encoding/binary"
-	"sort"
 	"strconv"
 )
 
@@ -25,6 +24,23 @@ func GetMD5Hash(id int) uint32 {
 	return binary.BigEndian.Uint32(hsh[0:])
 }
 
+//                           1
+//
+//                    3               2
+//
+//                            4
+//
+//
+
 func BisectLeft(starts []int, hsh uint32, count uint32, count2 int) int {
-	return sort.Search(len(starts), func(i int) bool { return starts[i] >= int(hsh%count) }) % count2
+	idx := hsh % count
+	res := 0
+	for i := 0; i < len(starts); i++ {
+		start := starts[i]
+		if start > int(idx) {
+			res = i - 1
+			break
+		}
+	}
+	return res % count2
 }

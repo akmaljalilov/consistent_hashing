@@ -15,7 +15,7 @@ func RingWithVN() {
 	}
 	newVNode2Node := append([]int{}, vNode2Node...)
 	newNodeId := NODE_COUNT + 1
-	vNodesToReassign := VNODE_COUNT / NEW_NODE_COUNT
+	vNodesToReassign := VNODE_COUNT / newNodeId
 	for vNodesToReassign > 0 {
 		for nodeToTakeFrom := 0; nodeToTakeFrom < NODE_COUNT; nodeToTakeFrom++ {
 			for vNodeId, nodeId := range newVNode2Node {
