@@ -122,7 +122,7 @@ func DurabilityWithAnchors() {
 		for vId := 0; vId < VNODE_COUNT; vId++ {
 			hsh := utils.GetMD5Hash(id)
 			index := utils.BisectLeft(hash2Index, hsh, DATA_ID_COUNT, NODE_COUNT)
-			if index > len(hash2Index) {
+			if index > len(hash2Index) || index < 0 {
 				index = 0
 			}
 			tmp := hash2Index[0:index]
@@ -138,7 +138,7 @@ func DurabilityWithAnchors() {
 	for id := 0; id < DATA_ID_COUNT; id++ {
 		hsh := utils.GetMD5Hash(id)
 		index := utils.BisectLeft(hash2Index, hsh, DATA_ID_COUNT, NODE_COUNT)
-		if index >= len(hash2Index) {
+		if index >= len(hash2Index) || index < 0 {
 			index = 0
 		}
 		nodeIds := []int{index2Node[index]}
