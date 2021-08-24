@@ -8,8 +8,9 @@ import (
 func RingWithVN() {
 	vNodeRangeStarts := []int{}
 	vNode2Node := []int{}
+	p := DATA_ID_COUNT / VNODE_COUNT
 	for id := 0; id < VNODE_COUNT; id++ {
-		vNodeRangeStarts = append(vNodeRangeStarts, DATA_ID_COUNT/VNODE_COUNT*id)
+		vNodeRangeStarts = append(vNodeRangeStarts, p*id)
 		vNode2Node = append(vNode2Node, id%NODE_COUNT)
 	}
 	newVNode2Node := append([]int{}, vNode2Node...)
