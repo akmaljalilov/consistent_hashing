@@ -3,7 +3,6 @@ package ring
 import (
 	"fmt"
 	"github.com/akmaljalilov/consistent_hashing/utils"
-	"sort"
 )
 
 func RingWithVN() {
@@ -33,7 +32,7 @@ func RingWithVN() {
 	movedIds := 0
 	for id := 0; id < DATA_ID_COUNT; id++ {
 		hsh := utils.GetMD5Hash(id)
-		vNodeId := sort.Search(len(vNodeRangeStarts), func(i int) bool { return vNodeRangeStarts[i] >= int(hsh%DATA_ID_COUNT) }) % VNODE_COUNT
+		vNodeId := utils.BisectLeft(vNodeRangeStarts, hsh, DATA_ID_COUNT, VNODE_COUNT)
 		nodeId := vNode2Node[vNodeId]
 		nNodeId := newVNode2Node[vNodeId]
 		if nodeId != nNodeId {

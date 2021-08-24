@@ -3,7 +3,6 @@ package ring
 import (
 	"fmt"
 	"github.com/akmaljalilov/consistent_hashing/utils"
-	"sort"
 )
 
 const (
@@ -15,19 +14,21 @@ const (
 
 func SimpleRing() {
 	nodeRangeStarts := []int{}
+	p := DATA_ID_COUNT / NODE_COUNT
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		nodeRangeStarts = append(nodeRangeStarts, DATA_ID_COUNT/NODE_COUNT*id)
+		nodeRangeStarts = append(nodeRangeStarts, p*id)
 	}
 
 	newNodeRangeStarts := []int{}
+	p = DATA_ID_COUNT / NEW_NODE_COUNT
 	for id := 0; id < NEW_NODE_COUNT; id++ {
-		newNodeRangeStarts = append(newNodeRangeStarts, DATA_ID_COUNT/NEW_NODE_COUNT*id)
+		newNodeRangeStarts = append(newNodeRangeStarts, p*id)
 	}
 	movedIds := 0
 	for id := 0; id < DATA_ID_COUNT; id++ {
 		hsh := utils.GetMD5Hash(id)
-		nodeId := sort.Search(len(nodeRangeStarts), func(i int) bool { return nodeRangeStarts[i] >= int(hsh%DATA_ID_COUNT) }) % NODE_COUNT
-		newNodeId := sort.Search(len(newNodeRangeStarts), func(i int) bool { return newNodeRangeStarts[i] >= int(hsh%DATA_ID_COUNT) }) % NEW_NODE_COUNT
+		nodeId := utils.BisectLeft(newNodeRangeStarts, hsh, DATA_ID_COUNT, NODE_COUNT)
+		newNodeId := utils.BisectLeft(newNodeRangeStarts, hsh, DATA_ID_COUNT, NEW_NODE_COUNT)
 		if nodeId != newNodeId {
 			movedIds++
 		}
