@@ -1,6 +1,10 @@
 package main
 
-import cons_hash "github.com/akmaljalilov/consistent_hashing/cons-hash"
+import (
+	"fmt"
+	"github.com/akmaljalilov/consistent_hashing/Simple"
+	exam_simple_modulus "github.com/akmaljalilov/consistent_hashing/exam-simple-modulus"
+)
 
 const (
 	PARTITION_POWER = 16
@@ -10,13 +14,11 @@ const (
 )
 
 func main() {
-	nodes := make([]map[string]int, 0)
-
-	/*Simple.Distribution()
+	Simple.SimpleModulus()
 	fmt.Println("-------------------------------------------------------------------------------------")
-	printMovedPercent()
+	exam_simple_modulus.DefineMovedPercent()
 	fmt.Println("-------------------------------------------------------------------------------------")
-	ring.SimpleRing()
+	/*ring.SimpleRing()
 	fmt.Println("-------------------------------------------------------------------------------------")
 	ring.RingWithVN()
 	fmt.Println("-------------------------------------------------------------------------------------")
@@ -29,7 +31,8 @@ func main() {
 	durability.DurabilityWithZones()
 	fmt.Println("-------------------------------------------------------------------------------------")
 	durability.DurabilityWithAnchors()
-	fmt.Println("-------------------------------------------------------------------------------------")*/
+	fmt.Println("-------------------------------------------------------------------------------------")
+	nodes := make([]map[string]int, 0)
 	for len(nodes) < NODE_COUNT {
 		zone := 0
 		for zone < ZONE_COUNT && len(nodes) < NODE_COUNT {
@@ -39,5 +42,5 @@ func main() {
 		}
 	}
 	ring := cons_hash.BuildRing(nodes, PARTITION_POWER, REPLICAS)
-	cons_hash.TestRing(ring, NODE_COUNT, ZONE_COUNT)
+	cons_hash.TestRing(ring, NODE_COUNT, ZONE_COUNT)*/
 }
