@@ -1,12 +1,9 @@
 package durability
 
 import (
-	"crypto/md5"
-	"encoding/binary"
 	"fmt"
+	"github.com/akmaljalilov/consistent_hashing/utils"
 	"math/rand"
-	"sort"
-	"strconv"
 	"time"
 )
 
@@ -17,7 +14,6 @@ const (
 	PARTITION_MAX   = 2<<PARTITION_POWER - 1
 	NODE_COUNT      = 256
 	DATA_ID_COUNT   = 10000000
-	ZONE_COUNT      = 16
 	VNODE_COUNT     = 100
 )
 
@@ -26,11 +22,9 @@ func Durability() {
 	for id := 0; id < (2 << PARTITION_POWER); id++ {
 		part2Node = append(part2Node, uint16(id%NODE_COUNT))
 	}
-
 	nodeCounts := make([]int, NODE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		hsh := md5.Sum([]byte(strconv.Itoa(id)))
-		part := binary.BigEndian.Uint32(hsh[0:]) >> PARTITION_SHIFT
+		part := utils.GetMD5Hash(id) >> PARTITION_SHIFT
 		nodeIds := []uint16{part2Node[part]}
 		nodeCounts[nodeIds[0]]++
 		for replica := 1; replica < REPLICAS; replica++ {
@@ -48,20 +42,14 @@ func Durability() {
 	}
 	desiredCount := DATA_ID_COUNT / NODE_COUNT * REPLICAS
 	fmt.Printf("%d: Desired data ids per node\n", desiredCount)
-	maxCount := nodeCounts[0]
-	minCount := nodeCounts[0]
-	for _, d := range nodeCounts {
-		if maxCount < d {
-			maxCount = d
-		} else if minCount > d {
-			minCount = d
-		}
-	}
+	maxCount, minCount := utils.GetCriticElements(nodeCounts)
 	over := float32(100*(maxCount-desiredCount)) / float32(desiredCount)
 	fmt.Printf("%d: Most data ids on one node, %v%% over\n", maxCount, over)
 	under := float32(100*(desiredCount-minCount)) / float32(desiredCount)
 	fmt.Printf("%d: Least data ids on one node, %v%% under\n", minCount, under)
 }
+
+const ZONE_COUNT = 16
 
 func DurabilityWithZones() {
 	node2Zone := []int{}
@@ -77,12 +65,10 @@ func DurabilityWithZones() {
 		part2Node = append(part2Node, uint16(id%NODE_COUNT))
 	}
 	Shuffle(part2Node)
-
 	nodeCounts := make([]int, NODE_COUNT)
 	zoneCounts := make([]int, ZONE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		hsh := md5.Sum([]byte(strconv.Itoa(id)))
-		part := binary.BigEndian.Uint32(hsh[0:]) >> PARTITION_SHIFT
+		part := utils.GetMD5Hash(id) >> PARTITION_SHIFT
 		nodeIds := []uint16{part2Node[part]}
 		zones := []int{node2Zone[nodeIds[0]]}
 		nodeCounts[nodeIds[0]]++
@@ -107,31 +93,14 @@ func DurabilityWithZones() {
 	}
 	desiredCount := DATA_ID_COUNT / NODE_COUNT * REPLICAS
 	fmt.Printf("%d: Desired data ids per node\n", desiredCount)
-	maxCount := nodeCounts[0]
-	minCount := nodeCounts[0]
-	for _, d := range nodeCounts {
-		if maxCount < d {
-			maxCount = d
-		} else if minCount > d {
-			minCount = d
-		}
-	}
+	maxCount, minCount := utils.GetCriticElements(nodeCounts)
 	over := float32(100*(maxCount-desiredCount)) / float32(desiredCount)
 	fmt.Printf("%d: Most data ids on one node, %v%% over\n", maxCount, over)
 	under := float32(100*(desiredCount-minCount)) / float32(desiredCount)
 	fmt.Printf("%d: Least data ids on one node, %v%% under\n", minCount, under)
-
 	desiredCount = DATA_ID_COUNT / ZONE_COUNT * REPLICAS
 	fmt.Printf("%d: Desired data ids per zone\n", desiredCount)
-	maxCount = zoneCounts[0]
-	minCount = zoneCounts[0]
-	for _, d := range zoneCounts {
-		if maxCount < d {
-			maxCount = d
-		} else if minCount > d {
-			minCount = d
-		}
-	}
+	maxCount, minCount = utils.GetCriticElements(zoneCounts)
 	over = float32(100*(maxCount-desiredCount)) / float32(desiredCount)
 	fmt.Printf("%d: Most data ids on one zone, %v%% over\n", maxCount, over)
 	under = float32(100*(desiredCount-minCount)) / float32(desiredCount)
@@ -151,14 +120,13 @@ func DurabilityWithAnchors() {
 	index2Node := []int{}
 	for id := 0; id < NODE_COUNT; id++ {
 		for vId := 0; vId < VNODE_COUNT; vId++ {
-			hsh := md5.Sum([]byte(strconv.Itoa(id)))
-			bi := binary.BigEndian.Uint32(hsh[0:])
-			index := sort.Search(len(hash2Index), func(i int) bool { return hash2Index[i] >= int(bi) })
+			hsh := utils.GetMD5Hash(id)
+			index := utils.BisectLeft(hash2Index, hsh, DATA_ID_COUNT, NODE_COUNT)
 			if index > len(hash2Index) {
 				index = 0
 			}
 			tmp := hash2Index[0:index]
-			tmp = append(tmp, int(bi))
+			tmp = append(tmp, int(hsh))
 			hash2Index = append(tmp, hash2Index[index:]...)
 			tmp = index2Node[0:index]
 			tmp = append(tmp, id)
@@ -168,9 +136,8 @@ func DurabilityWithAnchors() {
 	nodeCounts := make([]int, NODE_COUNT)
 	zoneCounts := make([]int, ZONE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		hsh := md5.Sum([]byte(strconv.Itoa(id)))
-		bi := binary.BigEndian.Uint32(hsh[0:])
-		index := sort.Search(len(hash2Index), func(i int) bool { return hash2Index[i] >= int(bi) })
+		hsh := utils.GetMD5Hash(id)
+		index := utils.BisectLeft(hash2Index, hsh, DATA_ID_COUNT, NODE_COUNT)
 		if index >= len(hash2Index) {
 			index = 0
 		}
@@ -198,31 +165,14 @@ func DurabilityWithAnchors() {
 	}
 	desiredCount := DATA_ID_COUNT / NODE_COUNT * REPLICAS
 	fmt.Printf("%d: Desired data ids per node\n", desiredCount)
-	maxCount := nodeCounts[0]
-	minCount := nodeCounts[0]
-	for _, d := range nodeCounts {
-		if maxCount < d {
-			maxCount = d
-		} else if minCount > d {
-			minCount = d
-		}
-	}
+	maxCount, minCount := utils.GetCriticElements(nodeCounts)
 	over := float32(100*(maxCount-desiredCount)) / float32(desiredCount)
 	fmt.Printf("%d: Most data ids on one node, %v%% over\n", maxCount, over)
 	under := float32(100*(desiredCount-minCount)) / float32(desiredCount)
 	fmt.Printf("%d: Least data ids on one node, %v%% under\n", minCount, under)
-
 	desiredCount = DATA_ID_COUNT / ZONE_COUNT * REPLICAS
 	fmt.Printf("%d: Desired data ids per zone\n", desiredCount)
-	maxCount = zoneCounts[0]
-	minCount = zoneCounts[0]
-	for _, d := range zoneCounts {
-		if maxCount < d {
-			maxCount = d
-		} else if minCount > d {
-			minCount = d
-		}
-	}
+	maxCount, minCount = utils.GetCriticElements(zoneCounts)
 	over = float32(100*(maxCount-desiredCount)) / float32(desiredCount)
 	fmt.Printf("%d: Most data ids on one zone, %v%% over\n", maxCount, over)
 	under = float32(100*(desiredCount-minCount)) / float32(desiredCount)

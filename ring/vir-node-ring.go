@@ -44,8 +44,9 @@ func RingWithVN() {
 	fmt.Printf("%d ids moved, %.2f%%\n", movedIds, movedPercent)
 }
 
-func RingWithVNOptimized() {
+const VNODE_COUNT = 1000
 
+func RingWithVNOptimized() {
 	vNode2Node := []int{}
 	for id := 0; id < VNODE_COUNT; id++ {
 		vNode2Node = append(vNode2Node, id%NODE_COUNT)
@@ -69,8 +70,7 @@ func RingWithVNOptimized() {
 	}
 	movedIds := 0
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		hsh := utils.GetMD5Hash(id)
-		vNodeId := hsh % VNODE_COUNT
+		vNodeId := utils.GetMD5Hash(id) % VNODE_COUNT
 		nodeId := vNode2Node[vNodeId]
 		nNodeId := newVNode2Node[vNodeId]
 		if nodeId != nNodeId {

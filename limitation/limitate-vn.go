@@ -1,10 +1,8 @@
 package limitation
 
 import (
-	"crypto/md5"
-	"encoding/binary"
 	"fmt"
-	"strconv"
+	"github.com/akmaljalilov/consistent_hashing/utils"
 )
 
 const (
@@ -21,24 +19,15 @@ func LimitateVN() {
 	}
 	nodeCounts := make([]int, NODE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		hsh := md5.Sum([]byte(strconv.Itoa(id)))
-		part := binary.BigEndian.Uint32(hsh[0:]) >> PARTITION_SHIFT
+		part := utils.GetMD5Hash(id) >> PARTITION_SHIFT
 		nodeId := part2Node[part]
 		nodeCounts[nodeId]++
 	}
 	desiredCount := DATA_ID_COUNT / NODE_COUNT
 	fmt.Printf("%d: Desired data ids per node\n", desiredCount)
-	maxCount := nodeCounts[0]
-	minCount := nodeCounts[0]
-	for _, d := range nodeCounts {
-		if maxCount < d {
-			maxCount = d
-		} else if minCount > d {
-			minCount = d
-		}
-	}
+	maxCount, minCount := utils.GetCriticElements(nodeCounts)
 	over := float32(100*(maxCount-desiredCount)) / float32(desiredCount)
-	fmt.Printf("%d: Most data ids on one node, %v%% over\n", maxCount, over)
+	fmt.Printf("%d: Most data ids on one node, %.2f%% over\n", maxCount, over)
 	under := float32(100*(desiredCount-minCount)) / float32(desiredCount)
-	fmt.Printf("%d: Least data ids on one node, %v%% under\n", minCount, under)
+	fmt.Printf("%d: Least data ids on one node, %.2f%% under\n", minCount, under)
 }

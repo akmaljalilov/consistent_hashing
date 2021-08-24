@@ -1,11 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"github.com/akmaljalilov/consistent_hashing/Simple"
-	exam_simple_modulus "github.com/akmaljalilov/consistent_hashing/exam-simple-modulus"
-	"github.com/akmaljalilov/consistent_hashing/ring"
-)
+import "github.com/akmaljalilov/consistent_hashing/durability"
 
 const (
 	PARTITION_POWER = 16
@@ -15,19 +10,22 @@ const (
 )
 
 func main() {
-	Simple.SimpleModulus()
-	fmt.Println("-------------------------------------------------------------------------------------")
-	exam_simple_modulus.DefineMovedPercent()
+	durability.DurabilityWithAnchors()
+
+	//ring.RingWithVNOptimized()
+	//limitation.LimitateVN()
+	/*	ring.SimpleRing()
+		exam_simple_modulus.DefineMovedPercent()
+
+		Simple.SimpleModulus()*/
+	/*fmt.Println("-------------------------------------------------------------------------------------")
 	fmt.Println("-------------------------------------------------------------------------------------")
 	ring.SimpleRing()
 	fmt.Println("-------------------------------------------------------------------------------------")
 	ring.RingWithVN()
 	fmt.Println("-------------------------------------------------------------------------------------")
-	ring.RingWithVNOptimized()
 	fmt.Println("-------------------------------------------------------------------------------------")
-	/*limitation.LimitateVN()
-	fmt.Println("-------------------------------------------------------------------------------------")
-	durability.Durability()
+
 	fmt.Println("-------------------------------------------------------------------------------------")
 	durability.DurabilityWithZones()
 	fmt.Println("-------------------------------------------------------------------------------------")

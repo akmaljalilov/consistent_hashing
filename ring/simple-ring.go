@@ -9,7 +9,6 @@ const (
 	NODE_COUNT     = 100
 	NEW_NODE_COUNT = 101
 	DATA_ID_COUNT  = 10_000_000
-	VNODE_COUNT    = 1000
 )
 
 func SimpleRing() {
@@ -18,7 +17,6 @@ func SimpleRing() {
 	for id := 0; id < NODE_COUNT; id++ {
 		nodeRangeStarts = append(nodeRangeStarts, p*id)
 	}
-
 	newNodeRangeStarts := []int{}
 	p = DATA_ID_COUNT / NEW_NODE_COUNT
 	for id := 0; id < NEW_NODE_COUNT; id++ {
