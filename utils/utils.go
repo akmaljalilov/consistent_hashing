@@ -32,15 +32,14 @@ func GetMD5Hash(id int) uint32 {
 //
 //
 
-func BisectLeft(starts []int, hsh uint32, count uint32, count2 int) int {
-	idx := hsh % count
+func BisectLeft(starts []int, hsh uint32) int {
 	res := 0
 	for i := 0; i < len(starts); i++ {
 		start := starts[i]
-		if start > int(idx) {
+		if start > int(hsh) {
 			res = i - 1
 			break
 		}
 	}
-	return res % count2
+	return res
 }

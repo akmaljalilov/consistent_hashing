@@ -10,30 +10,25 @@ import (
 const (
 	REPLICAS        = 3
 	PARTITION_POWER = 16
-	PARTITION_SHIFT = 32 - PARTITION_POWER
-	PARTITION_MAX   = 2<<PARTITION_POWER - 1
+	VNODE_COUNT     = 1 << PARTITION_POWER
 	NODE_COUNT      = 256
 	DATA_ID_COUNT   = 10000000
-	VNODE_COUNT     = 100
 )
 
 func Durability() {
 	part2Node := []uint16{}
-	for id := 0; id < (2 << PARTITION_POWER); id++ {
+	for id := 0; id < VNODE_COUNT; id++ {
 		part2Node = append(part2Node, uint16(id%NODE_COUNT))
 	}
 	nodeCounts := make([]int, NODE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		part := utils.GetMD5Hash(id) >> PARTITION_SHIFT
+		part := utils.GetMD5Hash(id) % VNODE_COUNT
 		nodeIds := []uint16{part2Node[part]}
 		nodeCounts[nodeIds[0]]++
 		for replica := 1; replica < REPLICAS; replica++ {
 			for _, n := range nodeIds {
 				if part2Node[part] == n {
-					part++
-					if part > PARTITION_MAX {
-						part = 0
-					}
+					part = (part + 1) % VNODE_COUNT
 				}
 			}
 			nodeIds = append(nodeIds, part2Node[part])
@@ -44,9 +39,9 @@ func Durability() {
 	fmt.Printf("%d: Desired data ids per node\n", desiredCount)
 	maxCount, minCount := utils.GetCriticElements(nodeCounts)
 	over := float32(100*(maxCount-desiredCount)) / float32(desiredCount)
-	fmt.Printf("%d: Most data ids on one node, %v%% over\n", maxCount, over)
+	fmt.Printf("%d: Most data ids on one node, %.2f%% over\n", maxCount, over)
 	under := float32(100*(desiredCount-minCount)) / float32(desiredCount)
-	fmt.Printf("%d: Least data ids on one node, %v%% under\n", minCount, under)
+	fmt.Printf("%d: Least data ids on one node, %.2f%% under\n", minCount, under)
 }
 
 const ZONE_COUNT = 16
@@ -61,14 +56,14 @@ func DurabilityWithZones() {
 		}
 	}
 	part2Node := []uint16{}
-	for id := 0; id < (2 << PARTITION_POWER); id++ {
+	for id := 0; id < VNODE_COUNT; id++ {
 		part2Node = append(part2Node, uint16(id%NODE_COUNT))
 	}
 	Shuffle(part2Node)
 	nodeCounts := make([]int, NODE_COUNT)
 	zoneCounts := make([]int, ZONE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		part := utils.GetMD5Hash(id) >> PARTITION_SHIFT
+		part := utils.GetMD5Hash(id) % VNODE_COUNT
 		nodeIds := []uint16{part2Node[part]}
 		zones := []int{node2Zone[nodeIds[0]]}
 		nodeCounts[nodeIds[0]]++
@@ -77,13 +72,9 @@ func DurabilityWithZones() {
 			for _, n := range nodeIds {
 				for _, z := range zones {
 					if part2Node[part] == n && node2Zone[part2Node[part]] == z {
-						part++
-						if part > PARTITION_MAX {
-							part = 0
-						}
+						part = (part + 1) % VNODE_COUNT
 					}
 				}
-
 			}
 			nodeIds = append(nodeIds, part2Node[part])
 			zones = append(zones, node2Zone[nodeIds[len(nodeIds)-1]])
@@ -95,16 +86,16 @@ func DurabilityWithZones() {
 	fmt.Printf("%d: Desired data ids per node\n", desiredCount)
 	maxCount, minCount := utils.GetCriticElements(nodeCounts)
 	over := float32(100*(maxCount-desiredCount)) / float32(desiredCount)
-	fmt.Printf("%d: Most data ids on one node, %v%% over\n", maxCount, over)
+	fmt.Printf("%d: Most data ids on one node, %.2f%% over\n", maxCount, over)
 	under := float32(100*(desiredCount-minCount)) / float32(desiredCount)
-	fmt.Printf("%d: Least data ids on one node, %v%% under\n", minCount, under)
+	fmt.Printf("%d: Least data ids on one node, %.2f%% under\n", minCount, under)
 	desiredCount = DATA_ID_COUNT / ZONE_COUNT * REPLICAS
 	fmt.Printf("%d: Desired data ids per zone\n", desiredCount)
 	maxCount, minCount = utils.GetCriticElements(zoneCounts)
 	over = float32(100*(maxCount-desiredCount)) / float32(desiredCount)
-	fmt.Printf("%d: Most data ids on one zone, %v%% over\n", maxCount, over)
+	fmt.Printf("%d: Most data ids on one zone, %.2f%% over\n", maxCount, over)
 	under = float32(100*(desiredCount-minCount)) / float32(desiredCount)
-	fmt.Printf("%d: Least data ids on one zone, %v%% under\n", minCount, under)
+	fmt.Printf("%d: Least data ids on one zone, %.2f%% under\n", minCount, under)
 }
 
 func DurabilityWithAnchors() {
@@ -121,7 +112,7 @@ func DurabilityWithAnchors() {
 	for id := 0; id < NODE_COUNT; id++ {
 		for vId := 0; vId < VNODE_COUNT; vId++ {
 			hsh := utils.GetMD5Hash(id)
-			index := utils.BisectLeft(hash2Index, hsh, DATA_ID_COUNT, NODE_COUNT)
+			index := utils.BisectLeft(hash2Index, hsh)
 			if index > len(hash2Index) || index < 0 {
 				index = 0
 			}
@@ -137,7 +128,7 @@ func DurabilityWithAnchors() {
 	zoneCounts := make([]int, ZONE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
 		hsh := utils.GetMD5Hash(id)
-		index := utils.BisectLeft(hash2Index, hsh, DATA_ID_COUNT, NODE_COUNT)
+		index := utils.BisectLeft(hash2Index, hsh)
 		if index >= len(hash2Index) || index < 0 {
 			index = 0
 		}
@@ -149,10 +140,7 @@ func DurabilityWithAnchors() {
 			for _, n := range nodeIds {
 				for _, z := range zones {
 					if index2Node[index] == n && node2Zone[index2Node[index]] == z {
-						index++
-						if index >= len(hash2Index) {
-							index = 0
-						}
+						index = (index + 1) % VNODE_COUNT
 					}
 				}
 
@@ -167,16 +155,16 @@ func DurabilityWithAnchors() {
 	fmt.Printf("%d: Desired data ids per node\n", desiredCount)
 	maxCount, minCount := utils.GetCriticElements(nodeCounts)
 	over := float32(100*(maxCount-desiredCount)) / float32(desiredCount)
-	fmt.Printf("%d: Most data ids on one node, %v%% over\n", maxCount, over)
+	fmt.Printf("%d: Most data ids on one node, %.2f%% over\n", maxCount, over)
 	under := float32(100*(desiredCount-minCount)) / float32(desiredCount)
-	fmt.Printf("%d: Least data ids on one node, %v%% under\n", minCount, under)
+	fmt.Printf("%d: Least data ids on one node, %.2f%% under\n", minCount, under)
 	desiredCount = DATA_ID_COUNT / ZONE_COUNT * REPLICAS
 	fmt.Printf("%d: Desired data ids per zone\n", desiredCount)
 	maxCount, minCount = utils.GetCriticElements(zoneCounts)
 	over = float32(100*(maxCount-desiredCount)) / float32(desiredCount)
-	fmt.Printf("%d: Most data ids on one zone, %v%% over\n", maxCount, over)
+	fmt.Printf("%d: Most data ids on one zone, %.2f%% over\n", maxCount, over)
 	under = float32(100*(desiredCount-minCount)) / float32(desiredCount)
-	fmt.Printf("%d: Least data ids on one zone, %v%% under\n", minCount, under)
+	fmt.Printf("%d: Least data ids on one zone, %.2f%% under\n", minCount, under)
 }
 
 func Shuffle(vals []uint16) []uint16 {

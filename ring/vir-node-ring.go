@@ -33,7 +33,7 @@ func RingWithVN() {
 	movedIds := 0
 	for id := 0; id < DATA_ID_COUNT; id++ {
 		hsh := utils.GetMD5Hash(id)
-		vNodeId := utils.BisectLeft(vNodeRangeStarts, hsh, DATA_ID_COUNT, VNODE_COUNT)
+		vNodeId := utils.BisectLeft(vNodeRangeStarts, hsh%DATA_ID_COUNT) % VNODE_COUNT
 		nodeId := vNode2Node[vNodeId]
 		nNodeId := newVNode2Node[vNodeId]
 		if nodeId != nNodeId {

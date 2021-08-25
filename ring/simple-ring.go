@@ -25,8 +25,8 @@ func SimpleRing() {
 	movedIds := 0
 	for id := 0; id < DATA_ID_COUNT; id++ {
 		hsh := utils.GetMD5Hash(id)
-		nodeId := utils.BisectLeft(nodeRangeStarts, hsh, DATA_ID_COUNT, NODE_COUNT)
-		newNodeId := utils.BisectLeft(newNodeRangeStarts, hsh, DATA_ID_COUNT, NEW_NODE_COUNT)
+		nodeId := utils.BisectLeft(nodeRangeStarts, hsh%DATA_ID_COUNT) % NODE_COUNT
+		newNodeId := utils.BisectLeft(newNodeRangeStarts, hsh%DATA_ID_COUNT) % NEW_NODE_COUNT
 		if nodeId != newNodeId {
 			movedIds++
 		}
