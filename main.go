@@ -1,6 +1,6 @@
 package main
 
-import "github.com/akmaljalilov/consistent_hashing/durability"
+import "github.com/akmaljalilov/consistent_hashing/limitation"
 
 const (
 	PARTITION_POWER = 16
@@ -10,10 +10,10 @@ const (
 )
 
 func main() {
-	durability.DurabilityWithAnchors()
+	//durability.DurabilityWithAnchors()
 
 	//ring.RingWithVNOptimized()
-	//limitation.LimitateVN()
+	limitation.LimitateVN()
 	/*	ring.SimpleRing()
 		exam_simple_modulus.DefineMovedPercent()
 

@@ -7,19 +7,19 @@ import (
 
 const (
 	PARTITION_POWER = 23
-	PARTITION_SHIFT = 32 - PARTITION_POWER
 	NODE_COUNT      = 65536
 	DATA_ID_COUNT   = 100000000
 )
 
 func LimitateVN() {
 	part2Node := []uint16{}
-	for id := 0; id < (2 << PARTITION_POWER); id++ {
+	vNodeCount := 1 << PARTITION_POWER
+	for id := 0; id < vNodeCount; id++ {
 		part2Node = append(part2Node, uint16(id%NODE_COUNT))
 	}
 	nodeCounts := make([]int, NODE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
-		part := utils.GetMD5Hash(id) >> PARTITION_SHIFT
+		part := utils.GetMD5Hash(id) % uint32(vNodeCount)
 		nodeId := part2Node[part]
 		nodeCounts[nodeId]++
 	}
