@@ -23,12 +23,10 @@ func Durability() {
 	nodeCounts := make([]int, NODE_COUNT)
 	for id := 0; id < DATA_ID_COUNT; id++ {
 		part := utils.GetMD5Hash(id) % VNODE_COUNT
-		nodeIds := []uint16{part2Node[part]}
-		nodeCounts[nodeIds[0]]++
+		nodeCounts[part2Node[part]]++
 		for replica := 1; replica < REPLICAS; replica++ {
 			part = (part + 1) % VNODE_COUNT
-			nodeIds = append(nodeIds, part2Node[part])
-			nodeCounts[nodeIds[len(nodeIds)-1]]++
+			nodeCounts[part2Node[part]]++
 		}
 	}
 	desiredCount := DATA_ID_COUNT / NODE_COUNT * REPLICAS

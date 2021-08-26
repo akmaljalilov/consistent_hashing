@@ -10,8 +10,8 @@ const (
 )
 
 func main() {
-	durability.DurabilityWithAnchors()
-	//durability.Durability()
+	//durability.DurabilityWithAnchors()
+	durability.Durability()
 	//ring.RingWithVNOptimized()
 	//limitation.LimitateVN()
 	/*	ring.SimpleRing()
