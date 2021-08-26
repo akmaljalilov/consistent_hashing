@@ -26,11 +26,7 @@ func Durability() {
 		nodeIds := []uint16{part2Node[part]}
 		nodeCounts[nodeIds[0]]++
 		for replica := 1; replica < REPLICAS; replica++ {
-			for _, n := range nodeIds {
-				if part2Node[part] == n {
-					part = (part + 1) % VNODE_COUNT
-				}
-			}
+			part = (part + 1) % VNODE_COUNT
 			nodeIds = append(nodeIds, part2Node[part])
 			nodeCounts[nodeIds[len(nodeIds)-1]]++
 		}
@@ -116,13 +112,14 @@ func DurabilityWithAnchors() {
 			if index > len(hash2Index) || index < 0 {
 				index = 0
 			}
-			tmp := hash2Index[0:index]
+			tmp := append([]int{}, hash2Index[0:index]...)
 			tmp = append(tmp, int(hsh))
 			hash2Index = append(tmp, hash2Index[index:]...)
-			tmp = index2Node[0:index]
+			tmp = append([]int{}, index2Node[0:index]...)
 			tmp = append(tmp, id)
 			index2Node = append(tmp, index2Node[index:]...)
 		}
+		fmt.Print(id)
 	}
 	nodeCounts := make([]int, NODE_COUNT)
 	zoneCounts := make([]int, ZONE_COUNT)
