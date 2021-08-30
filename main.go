@@ -1,6 +1,6 @@
 package main
 
-import "github.com/akmaljalilov/consistent_hashing/durability"
+import "github.com/akmaljalilov/consistent_hashing/ring"
 
 const (
 	PARTITION_POWER = 16
@@ -10,14 +10,38 @@ const (
 )
 
 func main() {
+	/*nC := 4
+	vNC := 25
+	dI := 1000
+	vnP := make([]int, vNC)
+	vnI := make([]int, vNC)
+	nI:=make([]int,nC)
+	for i := 0; i < vNC; i++ {
+		vnP[i] = i % nC
+		nI[i%nC]++
+	}
+	for i := 0; i < dI; i++ {
+		vnI[i%vNC]++
+	}
+	min, max := utils.GetCriticElements(vnI)
+	fmt.Println(min)
+	fmt.Println(max)
+	fmt.Println(dI/vNC)
+	min, max = utils.GetCriticElements(nI)
+	fmt.Println(min)
+	fmt.Println(max)
+	fmt.Println(vNC/nC)*/
+
 	//durability.DurabilityWithAnchors()
-	durability.Durability()
+	//durability.Durability()
 	//ring.RingWithVNOptimized()
+	//Simple.SimpleModulus()
+	ring.SimpleRing()
 	//limitation.LimitateVN()
 	/*	ring.SimpleRing()
 		exam_simple_modulus.DefineMovedPercent()
 
-		Simple.SimpleModulus()*/
+	*/
 	/*fmt.Println("-------------------------------------------------------------------------------------")
 	fmt.Println("-------------------------------------------------------------------------------------")
 	ring.SimpleRing()

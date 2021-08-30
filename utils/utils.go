@@ -29,17 +29,22 @@ func GetMD5Hash(id int) uint32 {
 //                    3               2
 //
 //                            4
-//
+//v
 //
 
 func BisectLeft(starts []int, hsh uint32) int {
-	res := 0
-	for i := 0; i < len(starts); i++ {
-		start := starts[i]
-		if start > int(hsh) {
-			res = i - 1
-			break
+	i := 0
+	low, high := 0, len(starts)-1
+	for low < high {
+		i = (high + low) / 2
+
+		if uint32(starts[i]) > hsh {
+			high = i
+		} else if low < i {
+			low = i
+		} else {
+			return i
 		}
 	}
-	return res
+	return i
 }
