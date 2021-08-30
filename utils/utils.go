@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"crypto/md5"
-	"encoding/binary"
+	"hash/fnv"
 	"strconv"
 )
 
@@ -20,8 +19,9 @@ func GetCriticElements(counts []int) (int, int) {
 }
 
 func GetMD5Hash(id int) uint32 {
-	hsh := md5.Sum([]byte(strconv.Itoa(id)))
-	return binary.BigEndian.Uint32(hsh[0:])
+	h := fnv.New32a()
+	h.Write([]byte(strconv.Itoa(id)))
+	return h.Sum32()
 }
 
 //                           1
@@ -34,10 +34,9 @@ func GetMD5Hash(id int) uint32 {
 
 func BisectLeft(starts []int, hsh uint32) int {
 	i := 0
-	low, high := 0, len(starts)-1
+	low, high := 0, len(starts)
 	for low < high {
 		i = (high + low) / 2
-
 		if uint32(starts[i]) > hsh {
 			high = i
 		} else if low < i {
